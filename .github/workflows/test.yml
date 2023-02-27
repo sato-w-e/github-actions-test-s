@@ -1,17 +1,26 @@
-name: python-test
+name: nodejs-cache
 on: [push]
 jobs:
-  test:
+  cache-test:
     runs-on: ubuntu-latest
     steps:
       - name: repository checkout
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v3
+      - uses: actions/setup-node@v3
         with:
-          python-version: '3.9'
+          node-version: 18.14
+      
+      - name: restore cache
+        uses: actions/cache@v3
+        with:
+          path: ./nodejs/node_modules
+          key: nodejs-${{ hashFiles('./nodejs/package-lock.json') }}
+      
+      - name: resolve dependencies
+        run: npm install
+        working-directory: ./nodejs
       
       - name: Test
-        run: python -m unittest add_test
-        working-directory: ./python
+        run: npm test run
+        working-directory: ./nodejs
